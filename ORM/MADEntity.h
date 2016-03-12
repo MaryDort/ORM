@@ -19,14 +19,12 @@
 @property (strong, nonatomic, readwrite) NSMutableDictionary *siblings;
 
 + (instancetype)sharedEntity;
-+ (NSString *)tableName;
 + (instancetype)findFirstById:(NSInteger)entityId;
 + (NSArray *)showAll;
 
 - (id)fieldValueForKey:(NSString *)key;
 - (void)setFieldValue:(id)value forKey:(NSString *)key;
 - (void)save;
-//- (void)lazyLoad;
 - (void)insert;
 - (void)update;
 - (void)remove;
