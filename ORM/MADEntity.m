@@ -157,7 +157,7 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
         [obj enumerateKeysAndObjectsUsingBlock:^(id key, id obj1, BOOL *stop) {
             if (obj1 == nil) {
                 NSString *reason = [NSString stringWithFormat:
-                                    @"Object '%@' with id = %ld not found!", tableName, _entityId];
+                                    @"Object in the '%@' not found!", tableName];
                 @throw [[MADNotFoundError alloc] initWithName:@"MADNotFoundError"
                                                        reason:reason
                                                      userInfo:nil];
@@ -168,30 +168,65 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
     return result;
 }
 
-- (NSArray *)importParents {
+//- (void)importParents {
+//    NSArray *keys = [_fields allKeys];
+//
+//    for (NSString *parent in keys) {
+//        if (![parent hasPrefix:[NSString stringWithFormat:@"%@_", [self.class tableName]]]) {
+//            if ([parent hasSuffix:@"_id"]) {
+////                import parents from DB by parent_id(from _fields)
+//                NSRange range = [parent rangeOfString:@"_"];
+//                NSString *tableName = [[NSString alloc] init];
+//                
+//                if (range.location != NSNotFound) {
+//                    tableName = [parent substringToIndex:range.location];
+//                }
+//                
+//                NSString *query = [NSMutableString stringWithFormat:selectQuery, tableName, tableName, [_fields[parent] integerValue]];
+//                NSArray *result = [self uniqueSelectByQuery:query tableName:tableName];
+//                id object = [[NSClassFromString([self.class classNameWith:tableName]) alloc] initWithDictionary:result.firstObject];
+//
+//                [_parents addObject:object];
+//            }
+//        }
+//    }
+//}
+
+//- (id)getParent:(NSString *)key {
+//    NSString *parentName = [self.class classNameWith:key];
+//
+//    for (MADEntity *parent in _parents) {
+//        if ([[parent className] isEqualToString:parentName]) {
+//            return parent;
+//        }
+//    }
+//
+//    [self importParents];
+//
+//    for (MADEntity *parent in _parents) {
+//        if ([[parent className] isEqualToString:parentName]) {
+//            return parent;
+//        }
+//    }
+//
+//    return nil;
+//}
+
+- (id)importParent:(NSString *)parentName {
     NSArray *keys = [_fields allKeys];
-
+    
     for (NSString *parent in keys) {
-        if (![parent hasPrefix:[NSString stringWithFormat:@"%@_", [self.class tableName]]]) {
-            if ([parent hasSuffix:@"_id"]) {
-//                import parents from DB by parent_id from _fields
-                NSRange range = [parent rangeOfString:@"_"];
-                NSString *tableName = [[NSString alloc] init];
-                
-                if (range.location != NSNotFound) {
-                    tableName = [parent substringToIndex:range.location];
-                }
-                
-                NSString *query = [NSMutableString stringWithFormat:selectQuery, tableName, tableName, [_fields[parent] integerValue]];
-                NSArray *result = [self uniqueSelectByQuery:query tableName:tableName];
-                id object = [[NSClassFromString([self.class classNameWith:tableName]) alloc] initWithDictionary:result.firstObject];
-
-                [_parents addObject:object];
-            }
+        if ([parent isEqualToString:[NSString stringWithFormat:@"%@_id", parentName]]) {
+            NSString *query = [NSMutableString stringWithFormat:selectQuery, parentName, parentName, [_fields[parent] integerValue]];
+            NSArray *result = [self uniqueSelectByQuery:query tableName:parentName];
+            id object = [[NSClassFromString([self.class classNameWith:parentName]) alloc] initWithDictionary:result.firstObject];
+            
+            [_parents addObject:object];
+            
+            return object;
         }
     }
-    
-    return _parents;
+    return nil;
 }
 
 - (id)getParent:(NSString *)key {
@@ -203,15 +238,7 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
         }
     }
     
-    [self importParents];
-    
-    for (MADEntity *parent in _parents) {
-        if ([[parent className] isEqualToString:parentName]) {
-            return parent;
-        }
-    }
-
-    return nil;
+    return [self importParent:key];
 }
 
 - (void)setParentValue:(MADEntity *)value forKey:(NSString *)key {
@@ -236,7 +263,9 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
 }
 
 - (NSArray *)getChildren:(NSString *)key {
-    [self importChildren:key];
+    if (_children[key] == nil) {
+        [self importChildren:key];
+    }
     
     return _children[key];
 }
@@ -251,11 +280,14 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
     NSString *query = [NSMutableString stringWithFormat:
                        siblingQuery, fieldName, [self getJoinTableNameFromTable:fieldName], _tableName, _entityId];
 
-    _siblings[fieldName] = [self.class formObjects:[self uniqueSelectByQuery:query tableName:[self getJoinTableNameFromTable:fieldName]] className:fieldName];
+    _siblings[fieldName] = [self.class formObjects:[self uniqueSelectByQuery:query tableName:
+                                                    [self getJoinTableNameFromTable:fieldName]] className:fieldName];
 }
 
 - (id)getSiblings:(NSString *)key {
-    [self importSiblings:key];
+    if (_siblings[key] == nil) {
+        [self importSiblings:key];
+    }
     
     return _siblings[key];
 }

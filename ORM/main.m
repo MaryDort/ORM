@@ -8,7 +8,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MADEntity.h"
 #import "MADPost.h"
 #import "MADCategory.h"
 #import "MADTag.h"
@@ -43,5 +42,6 @@ int main(int argc, const char * argv[]) {
             NSLog(@"%@", tag.name);
         }
     }
+    
     return 0;
 }
