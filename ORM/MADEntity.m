@@ -31,14 +31,14 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
 @implementation MADEntity
 
 + (instancetype)sharedEntity {
-    static MADEntity *entity = nil;
+    static MADEntity *_entity = nil;
     static dispatch_once_t onceTocen;
     
     dispatch_once(&onceTocen, ^{
-        entity = [[MADEntity alloc] init];
+        _entity = [[MADEntity alloc] init];
     });
     
-    return entity;
+    return _entity;
 }
 
 + (NSString *)tableName {
@@ -271,7 +271,7 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
 }
 
 - (NSString *)getJoinTableNameFromTable:(NSString *)tableName {
-    NSArray *linkingTable = [@[tableName, _tableName] sortedArrayUsingSelector: @selector(compare:)];
+    NSArray *linkingTable = [@[tableName, _tableName] sortedArrayUsingSelector:@selector(compare:)];
     
     return [linkingTable componentsJoinedByString:@"__"];
 }
@@ -307,7 +307,7 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
 }
 
 - (void)save {
-    if (_entityId == -1) {
+    if (_entityId <= 0) {
         [self insert];
     } else {
         [self update];
@@ -352,7 +352,7 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
 }
 
 - (void)remove {
-    if (_entityId == -1) {
+    if (_entityId <= 0) {
         NSString *reason = [NSString stringWithFormat:
                             @"There is no object in %@ for such id!", [self.class tableName]];
         @throw [[MADNotFoundError alloc] initWithName:@"NotFoundError"

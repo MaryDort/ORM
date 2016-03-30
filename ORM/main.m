@@ -23,6 +23,8 @@ int main(int argc, const char * argv[]) {
         MADPost *firstPost = [MADPost findFirstById:1];
         NSLog(@"%@", firstPost.title);
         NSLog(@"%@", firstPost.category.title);
+        firstPost.title = @"Another title";
+        [firstPost save];
         firstPost.category = [MADCategory findFirstById:2];
         [firstPost save];
         NSLog(@"%@", firstPost.category.title);
