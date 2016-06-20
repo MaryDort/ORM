@@ -168,50 +168,6 @@ static NSString *updateChildren = @"UPDATE %@ SET %@_id = %ld WHERE %@_id IN (%@
     return result;
 }
 
-//- (void)importParents {
-//    NSArray *keys = [_fields allKeys];
-//
-//    for (NSString *parent in keys) {
-//        if (![parent hasPrefix:[NSString stringWithFormat:@"%@_", [self.class tableName]]]) {
-//            if ([parent hasSuffix:@"_id"]) {
-////                import parents from DB by parent_id(from _fields)
-//                NSRange range = [parent rangeOfString:@"_"];
-//                NSString *tableName = [[NSString alloc] init];
-//                
-//                if (range.location != NSNotFound) {
-//                    tableName = [parent substringToIndex:range.location];
-//                }
-//                
-//                NSString *query = [NSMutableString stringWithFormat:selectQuery, tableName, tableName, [_fields[parent] integerValue]];
-//                NSArray *result = [self uniqueSelectByQuery:query tableName:tableName];
-//                id object = [[NSClassFromString([self.class classNameWith:tableName]) alloc] initWithDictionary:result.firstObject];
-//
-//                [_parents addObject:object];
-//            }
-//        }
-//    }
-//}
-
-//- (id)getParent:(NSString *)key {
-//    NSString *parentName = [self.class classNameWith:key];
-//
-//    for (MADEntity *parent in _parents) {
-//        if ([[parent className] isEqualToString:parentName]) {
-//            return parent;
-//        }
-//    }
-//
-//    [self importParents];
-//
-//    for (MADEntity *parent in _parents) {
-//        if ([[parent className] isEqualToString:parentName]) {
-//            return parent;
-//        }
-//    }
-//
-//    return nil;
-//}
-
 - (id)importParent:(NSString *)parentName {
     NSArray *keys = [_fields allKeys];
     
