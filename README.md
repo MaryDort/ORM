@@ -15,7 +15,7 @@
         [section save];
         
         MADCategory *category = [MADCategory new];
-        category.title = @"Basic";
+        category.title = @"New Category";
         category.section = section;
         [category save];
         
